@@ -24,6 +24,7 @@ ever leaves the page. Open `index.html` from a USB stick and it works.
 ## Features
 
 - Fill in the fields and get a complete systemd `.service` unit.
+- One-click example units (simple daemon, oneshot, web app, database-dependent).
 - Covers [Unit], [Service], and [Install] with sensible defaults.
 - Copy the finished unit file.
 - **Both themes, six accents** — dark by default, light by preference or toggle; inputs, scrollbars and focus rings all follow the theme.
