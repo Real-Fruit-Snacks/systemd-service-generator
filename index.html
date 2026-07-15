@@ -32,6 +32,44 @@ var po=parseInt(localStorage.getItem("svc-pet-opacity"),10);if(po>=15&&po<=100)d
 fields are left out. Save it to <code>/etc/systemd/system/&lt;name&gt;.service</code> and run
 the install commands.</p>
 
+<div class="tool-examples" id="sd-examples" role="group" aria-label="Example units">
+  <span class="manifest-label tool-examples-label">examples</span>
+  <button type="button" data-ex="0">simple daemon</button>
+  <button type="button" data-ex="1">oneshot script</button>
+  <button type="button" data-ex="2">web app + env</button>
+  <button type="button" data-ex="3">depends on Postgres</button>
+</div>
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+  var form = document.querySelector(".sd-form"), box = document.getElementById("sd-examples");
+  if (!form || !box) return;
+  var P = [
+    { "sd-name": "myapp", "sd-desc": "My application", "sd-after": "network-online.target", "sd-wants": "network-online.target", "sd-type": "simple", "sd-exec": "/usr/bin/myapp --serve", "sd-user": "myapp", "sd-group": "myapp", "sd-restart": "on-failure", "sd-restartsec": "5", "sd-wantedby": "multi-user.target" },
+    { "sd-name": "provision", "sd-desc": "Run provisioning once", "sd-after": "network-online.target", "sd-type": "oneshot", "sd-exec": "/opt/scripts/provision.sh", "sd-remain": true, "sd-restart": "no", "sd-wantedby": "multi-user.target" },
+    { "sd-name": "web", "sd-desc": "Web frontend", "sd-after": "network-online.target", "sd-wants": "network-online.target", "sd-type": "exec", "sd-exec": "/opt/web/server", "sd-workdir": "/opt/web", "sd-user": "web", "sd-group": "web", "sd-env": "PORT=8080\nNODE_ENV=production", "sd-restart": "always", "sd-restartsec": "2", "sd-wantedby": "multi-user.target" },
+    { "sd-name": "api", "sd-desc": "API service", "sd-after": "network-online.target postgresql.service", "sd-requires": "postgresql.service", "sd-type": "simple", "sd-exec": "/usr/bin/api --config /etc/api.toml", "sd-user": "api", "sd-group": "api", "sd-restart": "on-failure", "sd-wantedby": "multi-user.target" }
+  ];
+  function apply(p) {
+    Array.prototype.forEach.call(form.querySelectorAll("input,textarea"), function (e) {
+      if (e.type === "checkbox" || e.type === "radio") e.checked = e.defaultChecked; else e.value = e.defaultValue;
+    });
+    Array.prototype.forEach.call(form.querySelectorAll("select"), function (s) {
+      var d = s.querySelector("option[selected]"); if (d) s.value = d.value; else s.selectedIndex = 0;
+    });
+    Object.keys(p).forEach(function (id) {
+      var e = document.getElementById(id); if (!e) return;
+      if (e.type === "checkbox") e.checked = !!p[id]; else e.value = p[id];
+    });
+    var f = form.querySelector("input,select,textarea");
+    f.dispatchEvent(new Event("change", { bubbles: true }));
+    f.dispatchEvent(new Event("input", { bubbles: true }));
+  }
+  box.addEventListener("click", function (ev) {
+    var b = ev.target.closest("button[data-ex]"); if (b) apply(P[+b.getAttribute("data-ex")]);
+  });
+});
+</script>
+
 <div class="sd-form">
   <div class="sd-section manifest-label">unit</div>
   <div class="sd-row">
